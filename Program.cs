@@ -1,3 +1,5 @@
+global using MinimalJwt.Data    ;
+global using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
@@ -9,7 +11,10 @@ using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddDbContext<DataContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -71,15 +76,15 @@ app.MapPost("/login",
     .Produces<string>();
 
 app.MapPost("/create",
-[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
-(Movie movie, IMovieService service) => Create(movie, service))
-    .Accepts<Movie>("application/json")
-    .Produces<Movie>(statusCode: 200, contentType: "application/json");
+// [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
+(Movie movie, IMovieService service) => Create(movie, service));
+    // .Accepts<Movie>("application/json")
+    // .Produces<Movie>(statusCode: 200, contentType: "application/json");
 
 app.MapGet("/get",
-[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Standard, Administrator")]
-(int id, IMovieService service) => Get(id, service))
-    .Produces<Movie>();
+// [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Standard, Administrator")]
+(int id, IMovieService service) => Get(id, service));
+    // .Produces<Movie>();
 
 app.MapGet("/list",
     (IMovieService service) => List(service))
@@ -133,7 +138,7 @@ IResult Login(UserLogin user, IUserService service)
 
 IResult Create(Movie movie, IMovieService service)
 {
-    var result = service.Create(movie);
+    var result = service.CreateAsync(movie);
     return Results.Ok(result);
 }
 

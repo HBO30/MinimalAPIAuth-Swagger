@@ -5,7 +5,14 @@ namespace MinimalJwt.Services
 {
     public class MovieService : IMovieService
     {
-        public Movie Create(Movie movie)
+         private readonly DataContext _context;
+
+        public MovieService(DataContext context)
+        {
+            _context = context;
+        }
+
+        public Movie CreateAsync(Movie movie)
         {
             movie.Id = MovieRepository.Movies.Count + 1;
             MovieRepository.Movies.Add(movie);
